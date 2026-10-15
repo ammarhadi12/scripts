@@ -1,0 +1,47 @@
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+*.pem
+*.key
+sf_private_key.p8
+
+# Logs and generated reports
+*.log
+logs/
+reports/
+output/
+tmp/
+temp/
+
+# Local configuration containing sensitive details
+config.local.yaml
+config.local.yml
+settings.local.json
+
+# Editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# additional VMs
+test_prom.py
+*.pdf
+infra_Report*
+
+
