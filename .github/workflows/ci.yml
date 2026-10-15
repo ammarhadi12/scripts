@@ -1,5 +1,5 @@
 
-name: Python CI
+name: Monitoring Project CI
 
 on:
   push:
@@ -13,16 +13,17 @@ permissions:
 
 jobs:
   validate:
+    name: Validate and Test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -30,7 +31,45 @@ jobs:
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
+          pip install pytest PyYAML
 
       - name: Check Python syntax
+        run: python -m compileall -q .
+
+      - name: Validate YAML files
         run: |
-          python -m compileall -q .
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          files = [
+              p for p in Path(".").rglob("*.yaml")
+              if not any(
+                  part in {".git", ".venv", "venv", "__pycache__"}
+                  for part in p.parts
+              )
+          ]
+          files += [
+              p for p in Path(".").rglob("*.yml")
+              if ".github" not in p.parts
+              and not any(
+                  part in {".git", ".venv", "venv", "__pycache__"}
+                  for part in p.parts
+              )
+          ]
+
+          for file in files:
+              with file.open(encoding="utf-8") as f:
+                  list(yaml.safe_load_all(f))
+              print(f"Valid YAML: {file}")
+
+          print(f"Validated {len(files)} YAML file(s)")
+          PY
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest -q tests
+          else
+            echo "No tests directory found; skipping pytest."
+          fi
